@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/stGozman/weather-app-TOP/issues"
   },
-  "homepage": "https://github.com/stGozman/weather-app-TOP#readme"
+  "homepage": "https://github.com/stGozman/weather-app-TOP#readme",
+  "devDependencies": {
+    "tailwindcss": "^3.2.4"
+  }
 }
