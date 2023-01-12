@@ -1,9 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    './dist/**/*.{html,js}',
-    './src/**/*.{html,js}',
-  ],
+  content: ['./dist/**/*.{html,js}', './src/**/*.{html,js}'],
 
   theme: {
     screens: {
@@ -16,15 +13,15 @@ module.exports = {
     },
     extend: {
       colors: {
-        'colorName': '#color',
+        colorName: '#color',
       },
       fontFamily: {
         fontName: ['Font Official Name', 'font-type'],
       },
       boxShadow: {
-        'shadow': '0px 0px 0px 0px rgba(0, 0, 0, 0.0)',
+        shadow: '0px 0px 0px 0px rgba(0, 0, 0, 0.0)',
       },
     },
   },
   plugins: [],
-}
+};
