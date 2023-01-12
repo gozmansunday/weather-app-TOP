@@ -1,6 +1,9 @@
 const path = require('path');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const { watch } = require('fs');
 
 module.exports = {
+  devtool: 'source-map',
   mode: 'development',
   entry: './src/index.ts',
   output: {
@@ -24,7 +27,12 @@ module.exports = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: 'ts-loader',
+        use: {
+          loader: 'ts-loader',
+          options: {
+            transpileOnly: true,
+          }
+        },
         exclude: /node_modules/,
       },
       {
@@ -41,7 +49,12 @@ module.exports = {
             presets: [
               ['@babel/preset-env', { targets: "defaults" }]
             ],
-            plugins: ['@babel/plugin-proposal-class-properties']
+            plugins: [
+              '@babel/plugin-proposal-class-properties',
+              new ForkTsCheckerWebpackPlugin(),
+            ],
+
+            watch: true
           }
         }
       }
