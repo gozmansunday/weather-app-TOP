@@ -11,5 +11,10 @@
         "sourceType": "module"
     },
     "rules": {
+      "no-console": "off",
+      "semi": ["error", "always"],
+      "quotes": ["error", "double"],
+      "no-param-reassign": "off",
+      "import/no-cycle": "off"
     }
 }
