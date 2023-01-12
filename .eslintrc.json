@@ -17,6 +17,6 @@
     "quotes": "off",
     "no-param-reassign": "off",
     "import/no-cycle": "off",
-    "strictNullChecks": "off"
+    "strictNullChecks": true
   }
 }
