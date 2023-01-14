@@ -12,7 +12,8 @@ interface CityDetails {
 }
 
 interface CurrentWeatherDetails {
-  dataCalcTime: number;
+  date: string;
+  time: string;
   currentTemp: number;
   feelsLikeTemp: number;
   maxTemp: number;
@@ -52,7 +53,8 @@ const CreateCityDetailsObj = (cityDetails: CityDetails): CityDetails => {
 };
 
 const CreateCurrentWeatherDetailsObj = (weatherDetails: CurrentWeatherDetails): CurrentWeatherDetails => {
-  const dataCalcTime = weatherDetails.dataCalcTime;
+  const date = weatherDetails.date;
+  const time = weatherDetails.time;
   const currentTemp = weatherDetails.currentTemp;
   const feelsLikeTemp = weatherDetails.feelsLikeTemp;
   const maxTemp = weatherDetails.maxTemp;
@@ -68,7 +70,8 @@ const CreateCurrentWeatherDetailsObj = (weatherDetails: CurrentWeatherDetails): 
   const weatherIcon = weatherDetails.weatherIcon;
 
   return {
-    dataCalcTime,
+    date,
+    time,
     currentTemp,
     feelsLikeTemp,
     maxTemp,
@@ -127,8 +130,11 @@ const getCurrentWeather = async (cityName: string): Promise<CurrentWeatherDetail
     const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${cityDetails.lat}&lon=${cityDetails.lon}&units=metric&appid=${apiKey}`, { mode: 'cors' });
     const currentWeatherInfo = await response.json();
 
+    const dateAndTime = getDateAndTime(currentWeatherInfo.dt);
+
     const currentWeatherDetails = CreateCurrentWeatherDetailsObj({
-      dataCalcTime: currentWeatherInfo.dt,
+      date: getDateAndTime(currentWeatherInfo.dt).date,
+      time: getDateAndTime(currentWeatherInfo.dt).time,
       currentTemp: currentWeatherInfo.main.temp,
       feelsLikeTemp: currentWeatherInfo.main.feels_like,
       maxTemp: currentWeatherInfo.main.temp_max,
@@ -144,6 +150,7 @@ const getCurrentWeather = async (cityName: string): Promise<CurrentWeatherDetail
       weatherIcon: currentWeatherInfo.weather[0].icon
     });
 
+    console.log(currentWeatherInfo)
     console.log(currentWeatherDetails); //! REMOVE LATER!
     return currentWeatherDetails;
   } catch (error) {
@@ -190,21 +197,35 @@ const getThreeDaysForecast = async (cityName: string): Promise<ForecastDetails[]
   }
 };
 
+const getDateAndTime = (unixTime: number) => {
+  const date = intlFormat(fromUnixTime(unixTime), {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+
+  const time = intlFormat(fromUnixTime(unixTime), {
+    hour: 'numeric',
+    minute: 'numeric'
+  });
+
+  return { date, time };
+};
+
 getCurrentWeather('owerri');
 getThreeDaysForecast('owerri');
 
-// const newDate = fromUnixTime(1673653077);
-// const getDate = intlFormat(newDate, {
+// const getDate = intlFormat(fromUnixTime(1673734780), {
 //   weekday: 'long',
 //   day: 'numeric',
 //   month: 'long',
 //   year: 'numeric',
 // });
-// const getTime = intlFormat(newDate, {
+// const getTime = intlFormat(fromUnixTime(1673734780), {
 //   hour: 'numeric',
 //   minute: 'numeric'
 // });
 
-// console.log(newDate);
 // console.log(getDate);
 // console.log(getTime);
