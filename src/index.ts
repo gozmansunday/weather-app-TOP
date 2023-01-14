@@ -1,4 +1,7 @@
 import './style.css';
+import { fromUnixTime, intlFormat } from 'date-fns';
+
+const apiKey = '9095cc5220ce63f359ff2704300c35ba';
 
 interface CityDetails {
   cityName: string;
@@ -23,6 +26,13 @@ interface CurrentWeatherDetails {
   mainWeather: string;
   weatherDescription: string;
   weatherIcon: string;
+}
+
+interface ForecastDetails {
+  dateTime: number;
+  temp: number;
+  weather: string;
+  icon: string;
 }
 
 const CreateCityDetailsObj = (cityDetails: CityDetails): CityDetails => {
@@ -75,9 +85,23 @@ const CreateCurrentWeatherDetailsObj = (weatherDetails: CurrentWeatherDetails): 
   };
 };
 
+const CreateForecastDetailsObj = (forecastDetails: ForecastDetails): ForecastDetails => {
+  const dateTime = forecastDetails.dateTime;
+  const temp = forecastDetails.temp;
+  const weather = forecastDetails.weather;
+  const icon = forecastDetails.icon;
+
+  return {
+    dateTime,
+    temp,
+    weather,
+    icon
+  };
+};
+
 const getCityDetails = async (cityName: string): Promise<CityDetails> => {
   try {
-    const response = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=9095cc5220ce63f359ff2704300c35ba`, { mode: 'cors' });
+    const response = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${apiKey}`, { mode: 'cors' });
     const citiesList = await response.json();
     const countryFullname = new Intl.DisplayNames(['en'], { type: 'region' });
 
@@ -100,7 +124,7 @@ const getCurrentWeather = async (cityName: string): Promise<CurrentWeatherDetail
   console.log(cityDetails); //!REMOVE LATER!
 
   try {
-    const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${cityDetails.lat}&lon=${cityDetails.lon}&units=metric&appid=9095cc5220ce63f359ff2704300c35ba`, { mode: 'cors' });
+    const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${cityDetails.lat}&lon=${cityDetails.lon}&units=metric&appid=${apiKey}`, { mode: 'cors' });
     const currentWeatherInfo = await response.json();
 
     const currentWeatherDetails = CreateCurrentWeatherDetailsObj({
@@ -127,4 +151,60 @@ const getCurrentWeather = async (cityName: string): Promise<CurrentWeatherDetail
   }
 };
 
-getCurrentWeather('new delhi');
+const getThreeDaysForecast = async (cityName: string): Promise<ForecastDetails[]> => {
+  const cityDetails = await getCityDetails(cityName);
+
+  try {
+    const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${cityDetails.lat}&lon=${cityDetails.lon}&units=metric&cnt=24&appid=${apiKey}`, {mode: 'cors'});
+    const forecastInfo = await response.json();
+
+    const dateTimeArray: number[] = [];
+    const tempArray: number[] = [];
+    const weatherArray: string[] = [];
+    const iconArray: string[] = [];
+
+    forecastInfo.list.forEach((forecast: any) => {
+      dateTimeArray.push(forecast.dt);
+      tempArray.push(forecast.main.temp);
+      weatherArray.push(forecast.weather[0].description);
+      iconArray.push(forecast.weather[0].icon);
+    });
+
+    const totalForecastList: ForecastDetails[] = [];
+
+    for (let index = 0; index < 24; index += 1) {
+      const forecastObject = CreateForecastDetailsObj({
+        dateTime: dateTimeArray[index],
+        temp: tempArray[index],
+        weather: weatherArray[index],
+        icon: iconArray[index]
+      });
+
+      totalForecastList.push(forecastObject);
+    }
+
+    console.log(totalForecastList); //! REMOVE LATER
+    return totalForecastList;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+getCurrentWeather('owerri');
+getThreeDaysForecast('owerri');
+
+// const newDate = fromUnixTime(1673653077);
+// const getDate = intlFormat(newDate, {
+//   weekday: 'long',
+//   day: 'numeric',
+//   month: 'long',
+//   year: 'numeric',
+// });
+// const getTime = intlFormat(newDate, {
+//   hour: 'numeric',
+//   minute: 'numeric'
+// });
+
+// console.log(newDate);
+// console.log(getDate);
+// console.log(getTime);
