@@ -1,8 +1,6 @@
 import './style.css';
 import { fromUnixTime, intlFormat } from 'date-fns';
 
-const apiKey = '9095cc5220ce63f359ff2704300c35ba';
-
 interface CityDetails {
   cityName: string;
   state?: string;
@@ -14,24 +12,23 @@ interface CityDetails {
 interface CurrentWeatherDetails {
   date: string;
   time: string;
-  currentTemp: number;
-  feelsLikeTemp: number;
-  maxTemp: number;
-  minTemp: number;
-  humidity: number;
-  pressure: number;
-  sunrise: number;
-  sunset: number;
-  visibility: number;
-  windSpeed: number;
-  mainWeather: string;
+  currentTemp: string;
+  feelsLikeTemp: string;
+  maxTemp: string;
+  minTemp: string;
+  humidity: string;
+  pressure: string;
+  sunrise: string;
+  sunset: string;
+  windSpeed: string;
   weatherDescription: string;
   weatherIcon: string;
 }
 
 interface ForecastDetails {
-  dateTime: number;
-  temp: number;
+  date: string;
+  time: string;
+  temp: string;
   weather: string;
   icon: string;
 }
@@ -63,9 +60,7 @@ const CreateCurrentWeatherDetailsObj = (weatherDetails: CurrentWeatherDetails): 
   const pressure = weatherDetails.pressure;
   const sunrise = weatherDetails.sunrise;
   const sunset = weatherDetails.sunset;
-  const visibility = weatherDetails.visibility;
   const windSpeed = weatherDetails.windSpeed;
-  const mainWeather = weatherDetails.mainWeather;
   const weatherDescription = weatherDetails.weatherDescription;
   const weatherIcon = weatherDetails.weatherIcon;
 
@@ -80,31 +75,38 @@ const CreateCurrentWeatherDetailsObj = (weatherDetails: CurrentWeatherDetails): 
     pressure,
     sunrise,
     sunset,
-    visibility,
     windSpeed,
-    mainWeather,
     weatherDescription,
     weatherIcon
   };
 };
 
 const CreateForecastDetailsObj = (forecastDetails: ForecastDetails): ForecastDetails => {
-  const dateTime = forecastDetails.dateTime;
+  const date = forecastDetails.date;
+  const time = forecastDetails.time;
   const temp = forecastDetails.temp;
   const weather = forecastDetails.weather;
   const icon = forecastDetails.icon;
 
   return {
-    dateTime,
+    date,
+    time,
     temp,
     weather,
     icon
   };
 };
 
+const api = () => {
+  const key = '9095cc5220ce63f359ff2704300c35ba';
+  const unit = 'imperial';
+
+  return { key, unit };
+};
+
 const getCityDetails = async (cityName: string): Promise<CityDetails> => {
   try {
-    const response = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${apiKey}`, { mode: 'cors' });
+    const response = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${api().key}`, { mode: 'cors' });
     const citiesList = await response.json();
     const countryFullname = new Intl.DisplayNames(['en'], { type: 'region' });
 
@@ -127,30 +129,28 @@ const getCurrentWeather = async (cityName: string): Promise<CurrentWeatherDetail
   console.log(cityDetails); //!REMOVE LATER!
 
   try {
-    const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${cityDetails.lat}&lon=${cityDetails.lon}&units=metric&appid=${apiKey}`, { mode: 'cors' });
+    const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${cityDetails.lat}&lon=${cityDetails.lon}&units=${api().unit}&appid=${api().key}`, { mode: 'cors' });
     const currentWeatherInfo = await response.json();
 
-    const dateAndTime = getDateAndTime(currentWeatherInfo.dt);
+    const dateAndTime = getDateAndTime(currentWeatherInfo.sys.sunrise);
 
     const currentWeatherDetails = CreateCurrentWeatherDetailsObj({
       date: getDateAndTime(currentWeatherInfo.dt).date,
       time: getDateAndTime(currentWeatherInfo.dt).time,
-      currentTemp: currentWeatherInfo.main.temp,
-      feelsLikeTemp: currentWeatherInfo.main.feels_like,
-      maxTemp: currentWeatherInfo.main.temp_max,
-      minTemp: currentWeatherInfo.main.temp_min,
-      humidity: currentWeatherInfo.main.humidity,
-      pressure: currentWeatherInfo.main.pressure,
-      sunrise: currentWeatherInfo.sys.sunrise,
-      sunset: currentWeatherInfo.sys.sunset,
-      visibility: currentWeatherInfo.visibility,
-      windSpeed: currentWeatherInfo.wind.speed,
-      mainWeather: currentWeatherInfo.weather[0].main,
-      weatherDescription: currentWeatherInfo.weather[0].description,
+      currentTemp: formatTemp(currentWeatherInfo.main.temp),
+      feelsLikeTemp: formatTemp(currentWeatherInfo.main.feels_like),
+      maxTemp: formatTemp(currentWeatherInfo.main.temp_max),
+      minTemp: formatTemp(currentWeatherInfo.main.temp_min),
+      humidity: `${currentWeatherInfo.main.humidity}%`,
+      pressure: `${currentWeatherInfo.main.pressure}hPa`,
+      sunrise: getDateAndTime(currentWeatherInfo.sys.sunrise).time,
+      sunset: getDateAndTime(currentWeatherInfo.sys.sunset).time,
+      windSpeed: formatWindSpeed(currentWeatherInfo.wind.speed),
+      weatherDescription: capitalizeWeatherDescription(currentWeatherInfo.weather[0].description),
       weatherIcon: currentWeatherInfo.weather[0].icon
     });
 
-    console.log(currentWeatherInfo)
+    // console.log(currentWeatherInfo)
     console.log(currentWeatherDetails); //! REMOVE LATER!
     return currentWeatherDetails;
   } catch (error) {
@@ -162,18 +162,20 @@ const getThreeDaysForecast = async (cityName: string): Promise<ForecastDetails[]
   const cityDetails = await getCityDetails(cityName);
 
   try {
-    const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${cityDetails.lat}&lon=${cityDetails.lon}&units=metric&cnt=24&appid=${apiKey}`, {mode: 'cors'});
+    const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${cityDetails.lat}&lon=${cityDetails.lon}&units=${api().unit}&cnt=24&appid=${api().key}`, {mode: 'cors'});
     const forecastInfo = await response.json();
 
-    const dateTimeArray: number[] = [];
-    const tempArray: number[] = [];
+    const dateArray: string[] = [];
+    const timeArray: string[] = [];
+    const tempArray: string[] = [];
     const weatherArray: string[] = [];
     const iconArray: string[] = [];
 
     forecastInfo.list.forEach((forecast: any) => {
-      dateTimeArray.push(forecast.dt);
-      tempArray.push(forecast.main.temp);
-      weatherArray.push(forecast.weather[0].description);
+      dateArray.push(getDateAndTime(forecast.dt).date);
+      timeArray.push(getDateAndTime(forecast.dt).time);
+      tempArray.push(formatTemp(forecast.main.temp));
+      weatherArray.push(capitalizeWeatherDescription(forecast.weather[0].description));
       iconArray.push(forecast.weather[0].icon);
     });
 
@@ -181,7 +183,8 @@ const getThreeDaysForecast = async (cityName: string): Promise<ForecastDetails[]
 
     for (let index = 0; index < 24; index += 1) {
       const forecastObject = CreateForecastDetailsObj({
-        dateTime: dateTimeArray[index],
+        date: dateArray[index],
+        time: timeArray[index],
         temp: tempArray[index],
         weather: weatherArray[index],
         icon: iconArray[index]
