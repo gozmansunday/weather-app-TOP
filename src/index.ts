@@ -213,19 +213,23 @@ const getDateAndTime = (unixTime: number) => {
   return { date, time };
 };
 
+const formatTemp = (temp: number): string => {
+  if (api().unit === 'metric') {
+    return `${temp}°C`;
+  } else if (api().unit === 'imperial') {
+    return `${temp}°F`;
+  }
+};
+
+const formatWindSpeed = (windSpeed: number): string => {
+  if (api().unit === 'metric') {
+    return `${windSpeed}m/s`;
+  } else if (api().unit === 'imperial') {
+    return `${windSpeed}mph`;
+  }
+};
+
+const capitalizeWeatherDescription = (weatherDescription: string): string =>  weatherDescription.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.substring(1)).join(' ');
+
 getCurrentWeather('owerri');
 getThreeDaysForecast('owerri');
-
-// const getDate = intlFormat(fromUnixTime(1673734780), {
-//   weekday: 'long',
-//   day: 'numeric',
-//   month: 'long',
-//   year: 'numeric',
-// });
-// const getTime = intlFormat(fromUnixTime(1673734780), {
-//   hour: 'numeric',
-//   minute: 'numeric'
-// });
-
-// console.log(getDate);
-// console.log(getTime);
