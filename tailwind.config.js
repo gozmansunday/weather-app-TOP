@@ -16,7 +16,10 @@ module.exports = {
         colorName: '#color',
       },
       fontFamily: {
-        fontName: ['Font Official Name', 'font-type'],
+        mona: ['Mona Sans', 'sans-serif'],
+        hubot: ['Hubot Sans', 'sans-serif'],
+        dm: ['DM Sans', 'sans-serif'],
+        bebas: ['Bebas Neue', 'cursive'],
       },
       boxShadow: {
         shadow: '0px 0px 0px 0px rgba(0, 0, 0, 0.0)',
