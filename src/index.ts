@@ -23,6 +23,7 @@ interface CurrentWeatherDetails {
   windSpeed: string;
   weatherDescription: string;
   weatherIcon: string;
+  weatherID: number;
 }
 
 interface ForecastDetails {
@@ -31,6 +32,7 @@ interface ForecastDetails {
   temp: string;
   weather: string;
   icon: string;
+  weatherID: number;
 }
 
 const CreateCityDetailsObj = (cityDetails: CityDetails): CityDetails => {
@@ -63,6 +65,7 @@ const CreateCurrentWeatherDetailsObj = (weatherDetails: CurrentWeatherDetails): 
   const windSpeed = weatherDetails.windSpeed;
   const weatherDescription = weatherDetails.weatherDescription;
   const weatherIcon = weatherDetails.weatherIcon;
+  const weatherID = weatherDetails.weatherID;
 
   return {
     date,
@@ -77,7 +80,8 @@ const CreateCurrentWeatherDetailsObj = (weatherDetails: CurrentWeatherDetails): 
     sunset,
     windSpeed,
     weatherDescription,
-    weatherIcon
+    weatherIcon,
+    weatherID
   };
 };
 
@@ -87,19 +91,21 @@ const CreateForecastDetailsObj = (forecastDetails: ForecastDetails): ForecastDet
   const temp = forecastDetails.temp;
   const weather = forecastDetails.weather;
   const icon = forecastDetails.icon;
+  const weatherID = forecastDetails.weatherID;
 
   return {
     date,
     time,
     temp,
     weather,
-    icon
+    icon,
+    weatherID
   };
 };
 
 const api = () => {
   const key = '9095cc5220ce63f359ff2704300c35ba';
-  const unit = 'imperial';
+  const unit = 'metric';
 
   return { key, unit };
 };
@@ -132,8 +138,6 @@ const getCurrentWeather = async (cityName: string): Promise<CurrentWeatherDetail
     const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${cityDetails.lat}&lon=${cityDetails.lon}&units=${api().unit}&appid=${api().key}`, { mode: 'cors' });
     const currentWeatherInfo = await response.json();
 
-    const dateAndTime = getDateAndTime(currentWeatherInfo.sys.sunrise);
-
     const currentWeatherDetails = CreateCurrentWeatherDetailsObj({
       date: getDateAndTime(currentWeatherInfo.dt).date,
       time: getDateAndTime(currentWeatherInfo.dt).time,
@@ -147,7 +151,8 @@ const getCurrentWeather = async (cityName: string): Promise<CurrentWeatherDetail
       sunset: getDateAndTime(currentWeatherInfo.sys.sunset).time,
       windSpeed: formatWindSpeed(currentWeatherInfo.wind.speed),
       weatherDescription: capitalizeWeatherDescription(currentWeatherInfo.weather[0].description),
-      weatherIcon: currentWeatherInfo.weather[0].icon
+      weatherIcon: currentWeatherInfo.weather[0].icon,
+      weatherID: currentWeatherInfo.weather[0].id,
     });
 
     // console.log(currentWeatherInfo)
@@ -170,6 +175,7 @@ const getThreeDaysForecast = async (cityName: string): Promise<ForecastDetails[]
     const tempArray: string[] = [];
     const weatherArray: string[] = [];
     const iconArray: string[] = [];
+    const weatherIDArray: number[] = [];
 
     forecastInfo.list.forEach((forecast: any) => {
       dateArray.push(getDateAndTime(forecast.dt).date);
@@ -177,6 +183,7 @@ const getThreeDaysForecast = async (cityName: string): Promise<ForecastDetails[]
       tempArray.push(formatTemp(forecast.main.temp));
       weatherArray.push(capitalizeWeatherDescription(forecast.weather[0].description));
       iconArray.push(forecast.weather[0].icon);
+      weatherIDArray.push(forecast.weather[0].id);
     });
 
     const totalForecastList: ForecastDetails[] = [];
@@ -187,7 +194,8 @@ const getThreeDaysForecast = async (cityName: string): Promise<ForecastDetails[]
         time: timeArray[index],
         temp: tempArray[index],
         weather: weatherArray[index],
-        icon: iconArray[index]
+        icon: iconArray[index],
+        weatherID: weatherIDArray[index]
       });
 
       totalForecastList.push(forecastObject);
