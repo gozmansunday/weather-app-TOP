@@ -1,0 +1,246 @@
+[
+	{
+		"id": 200,
+		"src": "src/assets/icons/cloud-lightning-rain-fill.svg"
+	},
+	{
+		"id": 201,
+		"src": "src/assets/icons/cloud-lightning-rain-fill.svg"
+	},
+	{
+		"id": 202,
+		"src": "src/assets/icons/cloud-lightning-rain-fill.svg"
+	},
+	{
+		"id": 210,
+		"src": "src/assets/icons/cloud-lightning-fill.svg"
+	},
+	{
+		"id": 211,
+		"src": "src/assets/icons/cloud-lightning-fill.svg"
+	},
+	{
+		"id": 212,
+		"src": "src/assets/icons/cloud-lightning-fill.svg"
+	},
+	{
+		"id": 221,
+		"src": "src/assets/icons/cloud-lightning-fill.svg"
+	},
+	{
+		"id": 230,
+		"src": "src/assets/icons/cloud-lightning-rain-fill.svg"
+	},
+	{
+		"id": 231,
+		"src": "src/assets/icons/cloud-lightning-rain-fill.svg"
+	},
+	{
+		"id": 232,
+		"src": "src/assets/icons/cloud-lightning-rain-fill.svg"
+	},
+	{
+		"id": 300,
+		"src": "src/assets/icons/cloud-drizzle-fill.svg"
+	},
+	{
+		"id": 301,
+		"src": "src/assets/icons/cloud-drizzle-fill.svg"
+	},
+	{
+		"id": 302,
+		"src": "src/assets/icons/cloud-drizzle-fill.svg"
+	},
+	{
+		"id": 310,
+		"src": "src/assets/icons/cloud-drizzle-fill.svg"
+	},
+	{
+		"id": 311,
+		"src": "src/assets/icons/cloud-drizzle-fill.svg"
+	},
+	{
+		"id": 312,
+		"src": "src/assets/icons/cloud-drizzle-fill.svg"
+	},
+	{
+		"id": 313,
+		"src": "src/assets/icons/cloud-drizzle-fill.svg"
+	},
+	{
+		"id": 314,
+		"src": "src/assets/icons/cloud-drizzle-fill.svg"
+	},
+	{
+		"id": 321,
+		"src": "src/assets/icons/cloud-drizzle-fill.svg"
+	},
+	{
+		"id": 500,
+		"src": "src/assets/icons/cloud-rain-fill.svg"
+	},
+	{
+		"id": 501,
+		"src": "src/assets/icons/cloud-rain-fill.svg"
+	},
+	{
+		"id": 502,
+		"src": "src/assets/icons/cloud-rain-heavy-fill.svg"
+	},
+	{
+		"id": 503,
+		"src": "src/assets/icons/cloud-rain-heavy-fill.svg"
+	},
+	{
+		"id": 504,
+		"src": "src/assets/icons/cloud-rain-heavy-fill.svg"
+	},
+	{
+		"id": 511,
+		"src": "src/assets/icons/cloud-sleet-fill.svg"
+	},
+	{
+		"id": 520,
+		"src": "src/assets/icons/cloud-rain-fill.svg"
+	},
+	{
+		"id": 521,
+		"src": "src/assets/icons/cloud-rain-fill.svg"
+	},
+	{
+		"id": 522,
+		"src": "src/assets/icons/cloud-rain-fill.svg"
+	},
+	{
+		"id": 531,
+		"src": "src/assets/icons/cloud-rain-fill.svg"
+	},
+	{
+		"id": 600,
+		"src": "/assets/icons/snow/snow.svg"
+	},
+	{
+		"id": 601,
+		"src": "src/assets/icons/snow2.svg"
+	},
+	{
+		"id": 602,
+		"src": "src/assets/icons/snow2.svg"
+	},
+	{
+		"id": 611,
+		"src": "src/assets/icons/cloud-sleet-fill.svg"
+	},
+	{
+		"id": 612,
+		"src": "src/assets/icons/cloud-sleet-fill.svg"
+	},
+	{
+		"id": 613,
+		"src": "src/assets/icons/cloud-sleet-fill.svg"
+	},
+	{
+		"id": 615,
+		"src": "src/assets/icons/cloud-sleet-fill.svg"
+	},
+	{
+		"id": 616,
+		"src": "src/assets/icons/cloud-sleet-fill.svg"
+	},
+	{
+		"id": 620,
+		"src": "src/assets/icons/snow2.svg"
+	},
+	{
+		"id": 621,
+		"src": "src/assets/icons/snow2.svg"
+	},
+	{
+		"id": 622,
+		"src": "src/assets/icons/snow2.svg"
+	},
+	{
+		"id": 701,
+		"src": "src/assets/icons/cloud-fog2-fill.svg"
+	},
+	{
+		"id": 711,
+		"src": "src/assets/icons/cloud-haze2-fill.svg"
+	},
+	{
+		"id": 721,
+		"src": "src/assets/icons/cloud-haze2-fill.svg"
+	},
+	{
+		"id": 731,
+		"src": "src/assets/icons/cloud-haze2-fill.svg"
+	},
+	{
+		"id": 741,
+		"src": "src/assets/icons/cloud-fog2-fill.svg"
+	},
+	{
+		"id": 751,
+		"src": "src/assets/icons/cloud-haze2-fill.svg"
+	},
+	{
+		"id": 761,
+		"src": "src/assets/icons/cloud-haze2-fill.svg"
+	},
+	{
+		"id": 762,
+		"src": "src/assets/icons/cloud-haze2-fill.svg"
+	},
+	{
+		"id": 771,
+		"src": "src/assets/icons/cloud-haze2-fill.svg"
+	},
+	{
+		"id": 781,
+		"src": "src/assets/icons/cloud-haze2-fill.svg"
+	},
+	{
+		"icon": "01d",
+		"id": 800,
+		"src": "src/assets/icons/brightness-high-fill.svg"
+	},
+	{
+		"icon": "01n",
+		"id": 800,
+		"src": "src/assets/icons/moon-stars-fill.svg"
+	},
+	{
+		"icon": "02d",
+		"id": 801,
+		"src": "src/assets/icons/cloud-sun-fill.svg"
+	},
+	{
+		"icon": "02n",
+		"id": 801,
+		"src": "src/assets/icons/cloud-moon-fill.svg"
+	},
+	{
+		"icon": "03d",
+		"id": 802,
+		"src": "src/assets/icons/cloud-sun-fill.svg"
+	},
+	{
+		"icon": "03n",
+		"id": 802,
+		"src": "src/assets/icons/cloud-moon-fill.svg"
+	},
+	{
+		"icon": "04d",
+		"id": 803,
+		"src": "src/assets/icons/cloud-sun-fill.svg"
+	},
+	{
+		"icon": "04n",
+		"id": 803,
+		"src": "src/assets/icons/cloud-moon-fill.svg"
+	},
+	{
+		"id": 804,
+		"src": "src/assets/icons/clouds-fill.svg"
+	}
+]
