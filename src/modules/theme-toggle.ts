@@ -7,10 +7,8 @@ const toggleBtn = (): void => {
     
     if (themeToggleBtn.classList.contains('theme-toggle--toggled')) {
       html.classList.add('dark');
-      console.log('dark!');
     } else {
       html.classList.remove('dark');
-      console.log('not dark!');
     }
   };
 
