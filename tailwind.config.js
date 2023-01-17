@@ -2,6 +2,12 @@
 module.exports = {
   content: ['./dist/**/*.{html,js}', './src/**/*.{html,js}'],
 
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
+
+  darkMode: 'class',
+
   theme: {
     screens: {
       xs: '356px',
@@ -26,5 +32,6 @@ module.exports = {
       },
     },
   },
+
   plugins: [],
 };
