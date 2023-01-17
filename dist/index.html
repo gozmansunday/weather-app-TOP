@@ -13,13 +13,12 @@
     <title>Weather App</title>
   </head>
 
-  <body class="bg-neutral-300 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-300 transition duration-300">
+  <body class="bg-neutral-300 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-300 transition duration-500">
     <header class="container mx-auto py-1 flex items-center justify-between px-2 sm:px-1 md:px-0">
       <div class="flex items-center gap-1 md:gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 pb-1" viewBox="0 0 16 16">
           <path
-            d="M8 3a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 3zm8 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zm-13.5.5a.5.5 0 0 0 0-1h-2a.5.5 0 0 0 0 1h2zm11.157-6.157a.5.5 0 0 1 0 .707l-1.414 1.414a.5.5 0 1 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm-9.9 2.121a.5.5 0 0 0 .707-.707L3.05 5.343a.5.5 0 1 0-.707.707l1.414 1.414zM8 7a4 4 0 0 0-4 4 .5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5 4 4 0 0 0-4-4z" />
-        </svg>
+            d="M8 3a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 3zm8 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zm-13.5.5a.5.5 0 0 0 0-1h-2a.5.5 0 0 0 0 1h2zm11.157-6.157a.5.5 0 0 1 0 .707l-1.414 1.414a.5.5 0 1 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm-9.9 2.121a.5.5 0 0 0 .707-.707L3.05 5.343a.5.5 0 1 0-.707.707l1.414 1.414zM8 7a4 4 0 0 0-4 4 .5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5 4 4 0 0 0-4-4z" /></svg>
         <p class="hidden font-mona font-semibold text-3xl md:block">
           WEATHER
         </p>
@@ -28,7 +27,18 @@
         </p>
       </div>
 
-      <div>
+      <div class="flex items-center rounded-l-full gap-2 pb-2 md:gap-6">
+        <div>
+          <form class="flex items-center">
+            <input type="text" class="bg-transparent border-[3px] border-neutral-800 rounded-l-full focus:outline-none px-3 py-0.5 font-mona dark:border-neutral-300 w-36 xxs:w-40 sm:w-48 md:w-96 md:py-1 lg:w-[30rem]">
+            <button class="bg-neutral-800 border-[3px] border-neutral-800 text-neutral-300 pl-2 pr-3 py-1.5 rounded-r-full flex items-center justify-center dark:bg-neutral-300 dark:border-neutral-300 dark:text-neutral-800 md:py-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="" viewBox="0 0 16 16" class="">
+                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+              </svg>
+            </button>
+          </form>
+        </div>
+        
         <button id="theme-toggle-btn" class="theme-toggle" type="button" aria-label="Toggle theme">
           <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="1em" height="1em" fill="currentColor"
             class="theme-toggle__expand w-7 h-7 sm:w-8 sm:h-8" viewBox="0 0 32 32">
