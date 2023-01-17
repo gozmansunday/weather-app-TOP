@@ -1,5 +1,4 @@
-const html = document.querySelector('html') as HTMLHtmlElement;
-const themeToggleBtn = document.querySelector('#theme-toggle-btn') as HTMLButtonElement;
+import dom from './dom';
 
 export default function toggleBtn(): void {
   window.onload = () => {
@@ -15,23 +14,23 @@ export default function toggleBtn(): void {
   }
 
   if (theme === 'light') {
-    themeToggleBtn.classList.remove('theme-toggle--toggled');
-    html.classList.remove('dark');
+    dom.themeToggleBtn.classList.remove('theme-toggle--toggled');
+    dom.html.classList.remove('dark');
   } else if (theme === 'dark') {
-    themeToggleBtn.classList.add('theme-toggle--toggled');
-    html.classList.add('dark');
+    dom.themeToggleBtn.classList.add('theme-toggle--toggled');
+    dom.html.classList.add('dark');
   }
 
   localStorage.setItem('theme', JSON.stringify(theme));
 
-  themeToggleBtn.onclick = () => {
-    themeToggleBtn.classList.toggle('theme-toggle--toggled');
+  dom.themeToggleBtn.onclick = () => {
+    dom.themeToggleBtn.classList.toggle('theme-toggle--toggled');
     
-    if (themeToggleBtn.classList.contains('theme-toggle--toggled')) {
-      html.classList.add('dark');
+    if (dom.themeToggleBtn.classList.contains('theme-toggle--toggled')) {
+      dom.html.classList.add('dark');
       theme = 'dark';
     } else {
-      html.classList.remove('dark');
+      dom.html.classList.remove('dark');
       theme = 'light';
     }
 

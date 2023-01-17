@@ -2,6 +2,8 @@ import './style.css';
 import { fromUnixTime, intlFormat } from 'date-fns';
 import toggleBtn from './modules/theme-toggle';
 
+toggleBtn();
+
 interface CityDetails {
   cityName: string;
   state?: string;
@@ -245,4 +247,3 @@ const capitalizeWeatherDescription = (weatherDescription: string): string =>  we
 
 // getCurrentWeather('owerri');
 // getThreeDaysForecast('owerri');
-toggleBtn();
