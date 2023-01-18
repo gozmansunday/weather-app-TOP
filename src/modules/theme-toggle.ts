@@ -36,4 +36,4 @@ export default function toggleBtn(): void {
 
     localStorage.setItem('theme', JSON.stringify(theme));
   };
-};
+}
