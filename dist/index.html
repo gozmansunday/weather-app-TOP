@@ -14,7 +14,7 @@
   </head>
 
   <body class="bg-neutral-300 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-300 transition duration-300">
-    <header class="container mx-auto py-1 flex items-center justify-between px-2 sm:px-1 md:px-0">
+    <header class="container mx-auto pt-1 flex items-center justify-between px-2 sm:px-1 lg:px-0">
       <!-- Header Logo -->
       <div class="flex items-center gap-1 md:gap-2">
         <!-- Header Logo Icon -->
@@ -36,8 +36,8 @@
         <!-- Search Bar -->
         <div>
           <form class="flex items-center">
-            <input type="text" class="bg-transparent border-2 border-neutral-800 rounded-l-full focus:outline-none px-3 py-0.5 font-mona dark:border-neutral-300 w-36 xxs:w-40 sm:w-48 md:w-96 md:py-1 lg:w-[30rem]">
-            <button class="bg-neutral-800 border-2 border-neutral-800 text-neutral-300 pl-2 pr-3 py-1.5 rounded-r-full flex items-center justify-center dark:bg-neutral-300 dark:border-neutral-300 dark:text-neutral-800 md:py-2">
+            <input type="text" class="bg-transparent border-2 border-neutral-800 rounded-l-full focus:outline-none px-3 py-0 font-mona dark:border-neutral-300 w-36 xxs:w-40 sm:w-48 md:w-96 md:py-0.5 lg:w-[30rem] lg:border-[3px]">
+            <button class="bg-neutral-800 border-2 border-neutral-800 text-neutral-300 pl-2 pr-3 py-1 rounded-r-full flex items-center justify-center dark:bg-neutral-300 dark:border-neutral-300 dark:text-neutral-800 md:py-1.5 lg:border-[3px]">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="" viewBox="0 0 16 16" class="">
                 <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
               </svg>
@@ -61,6 +61,35 @@
         </button>
       </div>
     </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-2 font-mona space-y-2 sm:px-1 lg:px-0">
+      <!-- Sub Title and Unit Toggle -->
+      <section class="flex justify-between items-center">
+        <!-- Sub Title -->
+        <p class="pb-1.5 text-neutral-700 dark:text-neutral-400 sm:text-lg md:text-xl">
+          Current Weather Forecast
+        </p>
+        <!-- Unit Toggle -->
+        <div class="toggle">
+          <input type="checkbox" id="toggle" class="hidden peer"/>
+          <label for="toggle" class="bg-neutral-300 border-2 border-neutral-700 rounded-full cursor-pointer inline-block relative transition-all ease-in-out duration-300 w-12 h-7 pb-1 lg:border-[3px] after:content-['°C'] after:text-neutral-300 after:text-xs after:pt-0.5 after:flex after:justify-center after:items-center after:bg-neutral-700 after:rounded-full after:cursor-pointer after:absolute after:top-1/2 after:left-[3px] after:bottom-[2px] after:transition-all after:ease-in-out after:duration-300 after:w-[18px] after:h-[18px] after:-translate-y-1/2 after:peer-checked:translate-x-[19px] after:peer-checked:content-['°F'] dark:bg-neutral-800 dark:border-neutral-400 dark:after:text-neutral-800 dark:after:bg-neutral-400"></label>
+        </div>
+      </section>
+
+      <section class="">
+        <div>
+          <div class="">
+            <h1 class="text-3xl font-semibold xs:text-4xl sm:text-5xl md:text-6xl">
+              Port Harcourt
+            </h1>
+            <!-- <p class="font-bebas text-xl">
+              RIVERS STATE, NIGERIA
+            </p> -->
+          </div>
+        </div>
+      </section>
+    </main>
 
     <script src="main.js"></script>
   </body>
