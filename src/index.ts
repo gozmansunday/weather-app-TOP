@@ -245,5 +245,5 @@ const formatWindSpeed = (windSpeed: number): string => {
 
 const capitalizeWeatherDescription = (weatherDescription: string): string =>  weatherDescription.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.substring(1)).join(' ');
 
-// getCurrentWeather('owerri');
-// getThreeDaysForecast('owerri');
+getCurrentWeather('port harcourt');
+getThreeDaysForecast('port harcourt');
