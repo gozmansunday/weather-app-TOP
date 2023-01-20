@@ -240,14 +240,13 @@ const capitalizeWeatherDescription = (weatherDescription: string): string =>  we
 
 const runApp = (): void => {
   const apiKey = '9095cc5220ce63f359ff2704300c35ba';
-  // let apiUnit = 'metric';
   let apiUnit: string;
 
   if (localStorage.getItem('unit')) {
     apiUnit = JSON.parse(localStorage.getItem('unit'));
-    // if (apiUnit === 'imperial') {
-    //   dom.unitToggleBtn.checked = true;
-    // }
+    if (apiUnit === 'imperial') {
+      dom.unitToggleBtn.checked = true;
+    }
   } else {
     apiUnit = 'metric';
   }
@@ -269,6 +268,4 @@ const runApp = (): void => {
   }
 }
 
-// getCurrentWeather('lagos');
-// getThreeDaysForecast('lagos');
 runApp();
