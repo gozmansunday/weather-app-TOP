@@ -1,6 +1,7 @@
 import './style.css';
 import { fromUnixTime, intlFormat } from 'date-fns';
 import toggleBtn from './modules/theme-toggle';
+import dom from './modules/dom';
 
 toggleBtn();
 
@@ -17,8 +18,6 @@ interface CurrentWeatherDetails {
   time: string;
   currentTemp: string;
   feelsLikeTemp: string;
-  maxTemp: string;
-  minTemp: string;
   humidity: string;
   pressure: string;
   sunrise: string;
@@ -59,8 +58,6 @@ const CreateCurrentWeatherDetailsObj = (weatherDetails: CurrentWeatherDetails): 
   const time = weatherDetails.time;
   const currentTemp = weatherDetails.currentTemp;
   const feelsLikeTemp = weatherDetails.feelsLikeTemp;
-  const maxTemp = weatherDetails.maxTemp;
-  const minTemp = weatherDetails.minTemp;
   const humidity = weatherDetails.humidity;
   const pressure = weatherDetails.pressure;
   const sunrise = weatherDetails.sunrise;
@@ -75,8 +72,6 @@ const CreateCurrentWeatherDetailsObj = (weatherDetails: CurrentWeatherDetails): 
     time,
     currentTemp,
     feelsLikeTemp,
-    maxTemp,
-    minTemp,
     humidity,
     pressure,
     sunrise,
@@ -113,9 +108,9 @@ const api = () => {
   return { key, unit };
 };
 
-const getCityDetails = async (cityName: string): Promise<CityDetails> => {
+const getCityDetails = async (cityName: string, apiKey: string): Promise<CityDetails> => {
   try {
-    const response = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${api().key}`, { mode: 'cors' });
+    const response = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${apiKey}`, { mode: 'cors' });
     const citiesList = await response.json();
     const countryFullname = new Intl.DisplayNames(['en'], { type: 'region' });
 
@@ -133,26 +128,24 @@ const getCityDetails = async (cityName: string): Promise<CityDetails> => {
   }
 };
 
-const getCurrentWeather = async (cityName: string): Promise<CurrentWeatherDetails> => {
-  const cityDetails = await getCityDetails(cityName);
+const getCurrentWeather = async (cityName: string, apiKey: string, apiUnit: string): Promise<CurrentWeatherDetails> => {
+  const cityDetails = await getCityDetails(cityName, apiKey);
   console.log(cityDetails); //!REMOVE LATER!
 
   try {
-    const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${cityDetails.lat}&lon=${cityDetails.lon}&units=${api().unit}&appid=${api().key}`, { mode: 'cors' });
+    const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${cityDetails.lat}&lon=${cityDetails.lon}&units=${apiUnit}&appid=${apiKey}`, { mode: 'cors' });
     const currentWeatherInfo = await response.json();
 
     const currentWeatherDetails = CreateCurrentWeatherDetailsObj({
       date: getDateAndTime(currentWeatherInfo.dt).date,
       time: getDateAndTime(currentWeatherInfo.dt).time,
-      currentTemp: formatTemp(currentWeatherInfo.main.temp),
-      feelsLikeTemp: formatTemp(currentWeatherInfo.main.feels_like),
-      maxTemp: formatTemp(currentWeatherInfo.main.temp_max),
-      minTemp: formatTemp(currentWeatherInfo.main.temp_min),
+      currentTemp: formatTemp(Math.round(currentWeatherInfo.main.temp), apiUnit),
+      feelsLikeTemp: formatTemp(Math.round(currentWeatherInfo.main.feels_like), apiUnit),
       humidity: `${currentWeatherInfo.main.humidity}%`,
       pressure: `${currentWeatherInfo.main.pressure}hPa`,
       sunrise: getDateAndTime(currentWeatherInfo.sys.sunrise).time,
       sunset: getDateAndTime(currentWeatherInfo.sys.sunset).time,
-      windSpeed: formatWindSpeed(currentWeatherInfo.wind.speed),
+      windSpeed: formatWindSpeed(currentWeatherInfo.wind.speed, apiUnit),
       weatherDescription: capitalizeWeatherDescription(currentWeatherInfo.weather[0].description),
       weatherIcon: currentWeatherInfo.weather[0].icon,
       weatherID: currentWeatherInfo.weather[0].id,
@@ -166,11 +159,11 @@ const getCurrentWeather = async (cityName: string): Promise<CurrentWeatherDetail
   }
 };
 
-const getThreeDaysForecast = async (cityName: string): Promise<ForecastDetails[]> => {
-  const cityDetails = await getCityDetails(cityName);
+const getThreeDaysForecast = async (cityName: string, apiKey: string, apiUnit: string): Promise<ForecastDetails[]> => {
+  const cityDetails = await getCityDetails(cityName, apiKey);
 
   try {
-    const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${cityDetails.lat}&lon=${cityDetails.lon}&units=${api().unit}&cnt=24&appid=${api().key}`, {mode: 'cors'});
+    const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${cityDetails.lat}&lon=${cityDetails.lon}&units=${apiUnit}&cnt=24&appid=${apiKey}`, {mode: 'cors'});
     const forecastInfo = await response.json();
 
     const dateArray: string[] = [];
@@ -183,7 +176,7 @@ const getThreeDaysForecast = async (cityName: string): Promise<ForecastDetails[]
     forecastInfo.list.forEach((forecast: any) => {
       dateArray.push(getDateAndTime(forecast.dt).date);
       timeArray.push(getDateAndTime(forecast.dt).time);
-      tempArray.push(formatTemp(forecast.main.temp));
+      tempArray.push(formatTemp(Math.round(forecast.main.temp), apiUnit));
       weatherArray.push(capitalizeWeatherDescription(forecast.weather[0].description));
       iconArray.push(forecast.weather[0].icon);
       weatherIDArray.push(forecast.weather[0].id);
@@ -227,23 +220,55 @@ const getDateAndTime = (unixTime: number) => {
   return { date, time };
 };
 
-const formatTemp = (temp: number): string => {
-  if (api().unit === 'metric') {
+const formatTemp = (temp: number, apiUnit: string): string => {
+  if (apiUnit === 'metric') {
     return `${temp}°C`;
-  } else if (api().unit === 'imperial') {
+  } else if (apiUnit === 'imperial') {
     return `${temp}°F`;
   }
 };
 
-const formatWindSpeed = (windSpeed: number): string => {
-  if (api().unit === 'metric') {
+const formatWindSpeed = (windSpeed: number, apiUnit: string): string => {
+  if (apiUnit === 'metric') {
     return `${windSpeed}m/s`;
-  } else if (api().unit === 'imperial') {
+  } else if (apiUnit === 'imperial') {
     return `${windSpeed}mph`;
   }
 };
 
 const capitalizeWeatherDescription = (weatherDescription: string): string =>  weatherDescription.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.substring(1)).join(' ');
 
-getCurrentWeather('owerri');
-getThreeDaysForecast('owerri');
+const runApp = (): void => {
+  const apiKey = '9095cc5220ce63f359ff2704300c35ba';
+  // let apiUnit = 'metric';
+  let apiUnit: string;
+
+  if (localStorage.getItem('unit')) {
+    apiUnit = JSON.parse(localStorage.getItem('unit'));
+    // if (apiUnit === 'imperial') {
+    //   dom.unitToggleBtn.checked = true;
+    // }
+  } else {
+    apiUnit = 'metric';
+  }
+
+  getCurrentWeather('Owerri', apiKey, apiUnit);
+  getThreeDaysForecast('Owerri', apiKey, apiUnit);
+  localStorage.setItem('unit', JSON.stringify(apiUnit));
+
+  dom.unitToggleBtn.onclick = () => {
+    if (apiUnit === 'metric') {
+      apiUnit = 'imperial';
+    } else if (apiUnit === 'imperial') {
+      apiUnit = 'metric';
+    }
+
+    getCurrentWeather('Owerri', apiKey, apiUnit);
+    getThreeDaysForecast('Owerri', apiKey, apiUnit);
+    localStorage.setItem('unit', JSON.stringify(apiUnit));
+  }
+}
+
+// getCurrentWeather('lagos');
+// getThreeDaysForecast('lagos');
+runApp();
