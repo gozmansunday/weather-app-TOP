@@ -106,7 +106,7 @@ const CreateForecastDetailsObj = (forecastDetails: ForecastDetails): ForecastDet
 
 const getCityDetails = async (cityName: string, apiKey: string): Promise<CityDetails> => {
   try {
-    const response = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${apiKey}`, { mode: 'cors' });
+    const response = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${apiKey}`, { mode: 'cors' });
     const citiesList = await response.json();
     const countryFullname = new Intl.DisplayNames(['en'], { type: 'region' });
 
@@ -136,13 +136,14 @@ const getCurrentWeather = async (cityName: string, apiKey: string, apiUnit: stri
     const greenwichInfo = await greenwichResponse.json();
 
     const currentWeatherDetails = CreateCurrentWeatherDetailsObj({
-      date: getDateAndTime(greenwichInfo.dt + currentWeatherInfo.timezone).date,
-      time: getDateAndTime(greenwichInfo.dt + currentWeatherInfo.timezone).time,
+      // TODO: resolve date and ime issues
+      date: getDateAndTime(greenwichInfo.dt + currentWeatherInfo.timezone - 3600).date,
+      time: getDateAndTime(greenwichInfo.dt + currentWeatherInfo.timezone - 3600).time,
       currentTemp: formatTemp(Math.round(currentWeatherInfo.main.temp), apiUnit),
       feelsLikeTemp: formatTemp(Math.round(currentWeatherInfo.main.feels_like), apiUnit),
       humidity: `${currentWeatherInfo.main.humidity}%`,
       pressure: `${currentWeatherInfo.main.pressure}hPa`,
-      // TODO: Correct sunrise and sunset issues
+      // TODO: correct sunrise and sunset issues
       sunrise: getDateAndTime(currentWeatherInfo.sys.sunrise).time,
       sunset: getDateAndTime(currentWeatherInfo.sys.sunset).time,
       visibility: `${currentWeatherInfo.visibility / 1000}km`,
@@ -152,6 +153,8 @@ const getCurrentWeather = async (cityName: string, apiKey: string, apiUnit: stri
       weatherID: currentWeatherInfo.weather[0].id,
     });
 
+    console.log(getLocalTime(currentWeatherInfo.dt, currentWeatherInfo.timezone));
+
     console.log(currentWeatherInfo)
     console.log(currentWeatherDetails); //! REMOVE LATER!
     displayDetails(cityDetails, currentWeatherDetails);
@@ -160,6 +163,20 @@ const getCurrentWeather = async (cityName: string, apiKey: string, apiUnit: stri
     throw new Error(error.message);
   }
 };
+
+function getLocalTime(unixTimestamp: number, timezoneOffset: number) {
+  // Create a new Date object from the Unix timestamp
+  let date = new Date(unixTimestamp * 1000);
+
+  // Adjust the time based on the timezone offset (in minutes)
+  date.setMinutes(date.getMinutes() + (timezoneOffset / 60));
+
+  // Format the date and time in the desired format
+  let localTime = date.toLocaleString();
+
+  return localTime;
+}; // "9/24/2021, 7:00:00 AM" (example for New York)
+
 
 const getThreeDaysForecast = async (cityName: string, apiKey: string, apiUnit: string): Promise<ForecastDetails[]> => {
   const cityDetails = await getCityDetails(cityName, apiKey);
@@ -219,6 +236,8 @@ const getDateAndTime = (unixTime: number) => {
     hour: 'numeric',
     minute: 'numeric'
   });
+
+  // const date = new Date(unix * 1000);
 
   return { date, time };
 };
