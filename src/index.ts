@@ -2,8 +2,7 @@ import './style.css';
 import { fromUnixTime, intlFormat } from 'date-fns';
 import toggleBtn from './modules/theme-toggle';
 import dom from './modules/dom';
-
-toggleBtn();
+import { DateTime } from 'luxon';
 
 export interface CityDetails {
   cityName: string;
@@ -50,8 +49,8 @@ const CreateCityDetailsObj = (cityDetails: CityDetails): CityDetails => {
     state,
     country,
     lat,
-    lon
-  }
+    lon,
+  };
 };
 
 const CreateCurrentWeatherDetailsObj = (weatherDetails: CurrentWeatherDetails): CurrentWeatherDetails => {
@@ -82,7 +81,7 @@ const CreateCurrentWeatherDetailsObj = (weatherDetails: CurrentWeatherDetails): 
     windSpeed,
     weatherDescription,
     weatherIcon,
-    weatherID
+    weatherID,
   };
 };
 
@@ -100,13 +99,16 @@ const CreateForecastDetailsObj = (forecastDetails: ForecastDetails): ForecastDet
     temp,
     weather,
     icon,
-    weatherID
+    weatherID,
   };
 };
 
 const getCityDetails = async (cityName: string, apiKey: string): Promise<CityDetails> => {
   try {
-    const response = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${apiKey}`, { mode: 'cors' });
+    const response = await fetch(
+      `https://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${apiKey}`,
+      { mode: 'cors' }
+    );
     const citiesList = await response.json();
     const countryFullname = new Intl.DisplayNames(['en'], { type: 'region' });
 
@@ -115,7 +117,7 @@ const getCityDetails = async (cityName: string, apiKey: string): Promise<CityDet
       state: citiesList[0].state,
       country: countryFullname.of(citiesList[0].country),
       lat: citiesList[0].lat,
-      lon: citiesList[0].lon
+      lon: citiesList[0].lon,
     });
 
     return cityDetails;
@@ -124,28 +126,25 @@ const getCityDetails = async (cityName: string, apiKey: string): Promise<CityDet
   }
 };
 
-const getCurrentWeather = async (cityName: string, apiKey: string, apiUnit: string): Promise<CurrentWeatherDetails> => {
+const getCurrentWeather = async (cityName: string, apiKey: string, apiUnit: string
+): Promise<CurrentWeatherDetails> => {
   const cityDetails = await getCityDetails(cityName, apiKey);
   const greenwichDetails = await getCityDetails('greenwich', apiKey);
   console.log(cityDetails); //!REMOVE LATER!
 
   try {
     const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${cityDetails.lat}&lon=${cityDetails.lon}&units=${apiUnit}&appid=${apiKey}`, { mode: 'cors' });
-    const greenwichResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${greenwichDetails.lat}&lon=${greenwichDetails.lon}&units=${apiUnit}&appid=${apiKey}`, { mode: 'cors' });
     const currentWeatherInfo = await response.json();
-    const greenwichInfo = await greenwichResponse.json();
 
     const currentWeatherDetails = CreateCurrentWeatherDetailsObj({
-      // TODO: resolve date and ime issues
-      date: getDateAndTime(greenwichInfo.dt + currentWeatherInfo.timezone - 3600).date,
-      time: getDateAndTime(greenwichInfo.dt + currentWeatherInfo.timezone - 3600).time,
+      date: getLocalDateTime(currentWeatherInfo.dt, currentWeatherInfo.timezone).localDate,
+      time: getLocalDateTime(currentWeatherInfo.dt, currentWeatherInfo.timezone).localTime,
       currentTemp: formatTemp(Math.round(currentWeatherInfo.main.temp), apiUnit),
       feelsLikeTemp: formatTemp(Math.round(currentWeatherInfo.main.feels_like), apiUnit),
       humidity: `${currentWeatherInfo.main.humidity}%`,
       pressure: `${currentWeatherInfo.main.pressure}hPa`,
-      // TODO: correct sunrise and sunset issues
-      sunrise: getDateAndTime(currentWeatherInfo.sys.sunrise).time,
-      sunset: getDateAndTime(currentWeatherInfo.sys.sunset).time,
+      sunrise: getLocalDateTime(currentWeatherInfo.sys.sunrise, currentWeatherInfo.timezone).localTime,
+      sunset: getLocalDateTime(currentWeatherInfo.sys.sunset, currentWeatherInfo.timezone).localTime,
       visibility: `${currentWeatherInfo.visibility / 1000}km`,
       windSpeed: formatWindSpeed(currentWeatherInfo.wind.speed, apiUnit),
       weatherDescription: capitalizeWeatherDescription(currentWeatherInfo.weather[0].description),
@@ -153,9 +152,7 @@ const getCurrentWeather = async (cityName: string, apiKey: string, apiUnit: stri
       weatherID: currentWeatherInfo.weather[0].id,
     });
 
-    console.log(getLocalTime(currentWeatherInfo.dt, currentWeatherInfo.timezone));
-
-    console.log(currentWeatherInfo)
+    // console.log(currentWeatherInfo);
     console.log(currentWeatherDetails); //! REMOVE LATER!
     displayDetails(cityDetails, currentWeatherDetails);
     return currentWeatherDetails;
@@ -164,25 +161,54 @@ const getCurrentWeather = async (cityName: string, apiKey: string, apiUnit: stri
   }
 };
 
-function getLocalTime(unixTimestamp: number, timezoneOffset: number) {
-  // Create a new Date object from the Unix timestamp
-  let date = new Date(unixTimestamp * 1000);
+const getLocalDateTime = (timestamp: number, offset: number) => {
+  // Convert timestamp to milliseconds
+  const timestampInMilliseconds = timestamp * 1000;
 
-  // Adjust the time based on the timezone offset (in minutes)
-  date.setMinutes(date.getMinutes() + (timezoneOffset / 60));
+  // Create a DateTime object from the timestamp
+  const date = DateTime.fromMillis(timestampInMilliseconds);
 
-  // Format the date and time in the desired format
-  let localTime = date.toLocaleString();
+  console.log(`UTC${offset >= 0 ? '+' : '-'}${offset / 3600}`);
 
-  return localTime;
-}; // "9/24/2021, 7:00:00 AM" (example for New York)
+  let offsetString: string;
+  if (offset % 3600 === 0) {
+    // If the offset is a whole hour, use the format "UTC+5" or "UTC-5"
+    offsetString = `UTC${Math.sign(offset) === 1 ? '+' : '-'}${Math.abs(offset / 3600)}`;
+  } else {
+    // If the offset is not a whole hour, use the format "UTC+5:30" or "UTC-5:30"
+    offsetString = `UTC${Math.sign(offset) === 1 ? '+' : '-'}${Math.floor(Math.abs(offset / 3600))}:${Math.round((Math.abs(offset / 3600) - Math.floor(Math.abs(offset / 3600))) * 60)}`;
+  }
 
+  // Adjust the time zone offset
+  let time = date.setZone(offsetString).toString();
+  console.log(time);
+
+  if (time.length > 24) {
+    time = time.slice(0, -6);
+  } else if (time.length === 24) {
+    time = time.slice(0, -1);
+  }
+
+  const localDate = intlFormat(new Date(time), {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+
+  const localTime = intlFormat(new Date(time), {
+    hour: 'numeric',
+    minute: 'numeric',
+  });
+
+  return { localDate, localTime };
+};
 
 const getThreeDaysForecast = async (cityName: string, apiKey: string, apiUnit: string): Promise<ForecastDetails[]> => {
   const cityDetails = await getCityDetails(cityName, apiKey);
 
   try {
-    const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${cityDetails.lat}&lon=${cityDetails.lon}&units=${apiUnit}&cnt=24&appid=${apiKey}`, {mode: 'cors'});
+    const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${cityDetails.lat}&lon=${cityDetails.lon}&units=${apiUnit}&cnt=24&appid=${apiKey}`, { mode: 'cors' });
     const forecastInfo = await response.json();
 
     const dateArray: string[] = [];
@@ -211,7 +237,7 @@ const getThreeDaysForecast = async (cityName: string, apiKey: string, apiUnit: s
         temp: tempArray[index],
         weather: weatherArray[index],
         icon: iconArray[index],
-        weatherID: weatherIDArray[index]
+        weatherID: weatherIDArray[index],
       });
 
       totalForecastList.push(forecastObject);
@@ -234,10 +260,8 @@ const getDateAndTime = (unixTime: number) => {
 
   const time = intlFormat(fromUnixTime(unixTime), {
     hour: 'numeric',
-    minute: 'numeric'
+    minute: 'numeric',
   });
-
-  // const date = new Date(unix * 1000);
 
   return { date, time };
 };
@@ -258,7 +282,7 @@ const formatWindSpeed = (windSpeed: number, apiUnit: string): string => {
   }
 };
 
-const capitalizeWeatherDescription = (weatherDescription: string): string =>  weatherDescription.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.substring(1)).join(' ');
+const capitalizeWeatherDescription = (weatherDescription: string): string => weatherDescription.toLowerCase().split(' ').map((word) => word.charAt(0).toUpperCase() + word.substring(1)).join(' ');
 
 const displayDetails = (cityDetails: CityDetails, currentWeatherDetails: CurrentWeatherDetails): void => {
   let regionName: string;
@@ -268,8 +292,7 @@ const displayDetails = (cityDetails: CityDetails, currentWeatherDetails: Current
     regionName = `${cityDetails.state}, ${cityDetails.country}`;
   }
 
-  const firstInfo =
-    `
+  const firstInfo = `
     <div>
       <h1 class="text-[1.6rem] leading-[1] font-semibold -ml-0.5 xs:text-[2rem] sm:text-[2.25rem] md:text-[3.2rem] md:-ml-1 lg:text-[3.75rem]">
         ${cityDetails.cityName}
@@ -290,13 +313,15 @@ const displayDetails = (cityDetails: CityDetails, currentWeatherDetails: Current
         ${currentWeatherDetails.currentTemp}
       </p>
     </div>
-    `
-  
+    `;
+
   dom.firstInfoContainer.innerHTML = firstInfo;
 };
 
 const runApp = (): void => {
   // TODO: clean up main function
+  toggleBtn();
+
   const apiKey = '9095cc5220ce63f359ff2704300c35ba';
   let apiUnit: string;
   let cityName: string;
@@ -336,21 +361,21 @@ const runApp = (): void => {
 
     const cityName = dom.citySearch.value;
     localStorage.setItem('cityName', JSON.stringify(cityName));
-  
+
     getCurrentWeather(cityName, apiKey, apiUnit);
     getThreeDaysForecast(cityName, apiKey, apiUnit);
-  
+
     dom.unitToggleBtn.onclick = () => {
       if (apiUnit === 'metric') {
         apiUnit = 'imperial';
       } else if (apiUnit === 'imperial') {
         apiUnit = 'metric';
       }
-  
+
       getCurrentWeather(cityName, apiKey, apiUnit);
       getThreeDaysForecast(cityName, apiKey, apiUnit);
       localStorage.setItem('unit', JSON.stringify(apiUnit));
-    }
+    };
   });
 };
 
