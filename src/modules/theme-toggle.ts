@@ -25,7 +25,7 @@ export default function toggleBtn(): void {
 
   dom.themeToggleBtn.onclick = () => {
     dom.themeToggleBtn.classList.toggle('theme-toggle--toggled');
-    
+
     if (dom.themeToggleBtn.classList.contains('theme-toggle--toggled')) {
       dom.html.classList.add('dark');
       theme = 'dark';

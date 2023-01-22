@@ -11,6 +11,7 @@
 
 @font-face {
   font-family: 'Hubot Sans';
-  src: url('../src/assets/fonts/Hubot-Sans.woff2') format('woff2 supports variations'),
+  src: url('../src/assets/fonts/Hubot-Sans.woff2')
+      format('woff2 supports variations'),
     url('../src/assets/fonts/Hubot-Sans.woff2') format('woff2-variations');
 }
