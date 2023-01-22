@@ -6,4 +6,4 @@ export default {
   themeToggleBtn: document.querySelector('#theme-toggle-btn') as HTMLButtonElement,
   unitToggleBtn: document.querySelector('#toggle') as HTMLInputElement,
   firstInfoContainer: document.querySelector('#first-info-container') as HTMLDivElement,
-}
+};
