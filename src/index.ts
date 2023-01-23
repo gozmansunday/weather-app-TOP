@@ -310,9 +310,10 @@ const displayDetails = (cityDetails: CityDetails, currentWeatherDetails: Current
       }
     }
   });
-
+  
   dom.displayCityFirstInformation(cityDetails, currentWeatherDetails, regionName);
   dom.displayCitySecondInformation(currentWeatherDetails, iconSvgPath);
+  dom.displayCityThirdInformation(currentWeatherDetails);
 };
 
 const runApp = (): void => {
