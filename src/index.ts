@@ -1,10 +1,11 @@
 import './style.css';
-import { fromUnixTime, intlFormat } from 'date-fns';
+import { intlFormat } from 'date-fns';
 import toggleBtn from './modules/theme-toggle';
-import dom from './modules/dom';
+import * as dom from './modules/dom';
 import { DateTime } from 'luxon';
 
-export interface CityDetails {
+// Interfaces for various objects
+interface CityDetails {
   cityName: string;
   state?: string;
   country: string;
@@ -21,6 +22,7 @@ interface CurrentWeatherDetails {
   pressure: string;
   sunrise: string;
   sunset: string;
+  timezone: number;
   visibility: string;
   windSpeed: string;
   weatherDescription: string;
@@ -37,6 +39,7 @@ interface ForecastDetails {
   weatherID: number;
 }
 
+// Various objects Constructors
 const CreateCityDetailsObj = (cityDetails: CityDetails): CityDetails => {
   const cityName = cityDetails.cityName;
   const state = cityDetails.state;
@@ -62,6 +65,7 @@ const CreateCurrentWeatherDetailsObj = (weatherDetails: CurrentWeatherDetails): 
   const pressure = weatherDetails.pressure;
   const sunrise = weatherDetails.sunrise;
   const sunset = weatherDetails.sunset;
+  const timezone = weatherDetails.timezone;
   const windSpeed = weatherDetails.windSpeed;
   const visibility = weatherDetails.visibility;
   const weatherDescription = weatherDetails.weatherDescription;
@@ -77,6 +81,7 @@ const CreateCurrentWeatherDetailsObj = (weatherDetails: CurrentWeatherDetails): 
     pressure,
     sunrise,
     sunset,
+    timezone,
     visibility,
     windSpeed,
     weatherDescription,
@@ -103,15 +108,16 @@ const CreateForecastDetailsObj = (forecastDetails: ForecastDetails): ForecastDet
   };
 };
 
+// Function to call OpenWeather's Geocoding API to get details of a city.
 const getCityDetails = async (cityName: string, apiKey: string): Promise<CityDetails> => {
   try {
     const response = await fetch(
-      `https://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${apiKey}`,
-      { mode: 'cors' }
-    );
+      `https://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${apiKey}`, { mode: 'cors' });
     const citiesList = await response.json();
+    // get the city's country fullname
     const countryFullname = new Intl.DisplayNames(['en'], { type: 'region' });
 
+    // create an object containing details of the city
     const cityDetails = CreateCityDetailsObj({
       cityName: citiesList[0].name,
       state: citiesList[0].state,
@@ -126,16 +132,17 @@ const getCityDetails = async (cityName: string, apiKey: string): Promise<CityDet
   }
 };
 
+// Function to call OpenWeather's API to get the current weather information
 const getCurrentWeather = async (cityName: string, apiKey: string, apiUnit: string
 ): Promise<CurrentWeatherDetails> => {
+  // get city details object from city details function
   const cityDetails = await getCityDetails(cityName, apiKey);
-  const greenwichDetails = await getCityDetails('greenwich', apiKey);
-  console.log(cityDetails); //!REMOVE LATER!
 
   try {
     const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${cityDetails.lat}&lon=${cityDetails.lon}&units=${apiUnit}&appid=${apiKey}`, { mode: 'cors' });
     const currentWeatherInfo = await response.json();
 
+    // create an object containig information about the current weather of the city
     const currentWeatherDetails = CreateCurrentWeatherDetailsObj({
       date: getLocalDateTime(currentWeatherInfo.dt, currentWeatherInfo.timezone).localDate,
       time: getLocalDateTime(currentWeatherInfo.dt, currentWeatherInfo.timezone).localTime,
@@ -145,6 +152,7 @@ const getCurrentWeather = async (cityName: string, apiKey: string, apiUnit: stri
       pressure: `${currentWeatherInfo.main.pressure}hPa`,
       sunrise: getLocalDateTime(currentWeatherInfo.sys.sunrise, currentWeatherInfo.timezone).localTime,
       sunset: getLocalDateTime(currentWeatherInfo.sys.sunset, currentWeatherInfo.timezone).localTime,
+      timezone: currentWeatherInfo.timezone,
       visibility: `${currentWeatherInfo.visibility / 1000}km`,
       windSpeed: formatWindSpeed(currentWeatherInfo.wind.speed, apiUnit),
       weatherDescription: capitalizeWeatherDescription(currentWeatherInfo.weather[0].description),
@@ -152,8 +160,7 @@ const getCurrentWeather = async (cityName: string, apiKey: string, apiUnit: stri
       weatherID: currentWeatherInfo.weather[0].id,
     });
 
-    // console.log(currentWeatherInfo);
-    console.log(currentWeatherDetails); //! REMOVE LATER!
+    // console.log(currentWeatherInfo); //! REMOVE LATER!
     displayDetails(cityDetails, currentWeatherDetails);
     return currentWeatherDetails;
   } catch (error) {
@@ -161,51 +168,14 @@ const getCurrentWeather = async (cityName: string, apiKey: string, apiUnit: stri
   }
 };
 
-const getLocalDateTime = (timestamp: number, offset: number) => {
-  // Convert timestamp to milliseconds
-  const timestampInMilliseconds = timestamp * 1000;
-
-  // Create a DateTime object from the timestamp
-  const date = DateTime.fromMillis(timestampInMilliseconds);
-
-  console.log(`UTC${offset >= 0 ? '+' : '-'}${offset / 3600}`);
-
-  let offsetString: string;
-  if (offset % 3600 === 0) {
-    // If the offset is a whole hour, use the format "UTC+5" or "UTC-5"
-    offsetString = `UTC${Math.sign(offset) === 1 ? '+' : '-'}${Math.abs(offset / 3600)}`;
-  } else {
-    // If the offset is not a whole hour, use the format "UTC+5:30" or "UTC-5:30"
-    offsetString = `UTC${Math.sign(offset) === 1 ? '+' : '-'}${Math.floor(Math.abs(offset / 3600))}:${Math.round((Math.abs(offset / 3600) - Math.floor(Math.abs(offset / 3600))) * 60)}`;
-  }
-
-  // Adjust the time zone offset
-  let time = date.setZone(offsetString).toString();
-  console.log(time);
-
-  if (time.length > 24) {
-    time = time.slice(0, -6);
-  } else if (time.length === 24) {
-    time = time.slice(0, -1);
-  }
-
-  const localDate = intlFormat(new Date(time), {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
-
-  const localTime = intlFormat(new Date(time), {
-    hour: 'numeric',
-    minute: 'numeric',
-  });
-
-  return { localDate, localTime };
-};
-
+// Function to call OpenWeather's API to get the 3-hourly three days forecast
 const getThreeDaysForecast = async (cityName: string, apiKey: string, apiUnit: string): Promise<ForecastDetails[]> => {
+  // get city details object from city details function
   const cityDetails = await getCityDetails(cityName, apiKey);
+
+  // get current weather details object from current weather details function
+  const currentWeatherDetails = await getCurrentWeather(cityName, apiKey, apiUnit);
+  console.log(currentWeatherDetails);
 
   try {
     const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${cityDetails.lat}&lon=${cityDetails.lon}&units=${apiUnit}&cnt=24&appid=${apiKey}`, { mode: 'cors' });
@@ -218,10 +188,10 @@ const getThreeDaysForecast = async (cityName: string, apiKey: string, apiUnit: s
     const iconArray: string[] = [];
     const weatherIDArray: number[] = [];
 
-    // TODO: correct forecast date and time
+    // add required info into their respective arrays
     forecastInfo.list.forEach((forecast: any) => {
-      dateArray.push(getDateAndTime(forecast.dt).date);
-      timeArray.push(getDateAndTime(forecast.dt).time);
+      dateArray.push(getLocalDateTime(forecast.dt, currentWeatherDetails.timezone).localDate);
+      timeArray.push(getLocalDateTime(forecast.dt, currentWeatherDetails.timezone).localTime);
       tempArray.push(formatTemp(Math.round(forecast.main.temp), apiUnit));
       weatherArray.push(capitalizeWeatherDescription(forecast.weather[0].description));
       iconArray.push(forecast.weather[0].icon);
@@ -230,6 +200,7 @@ const getThreeDaysForecast = async (cityName: string, apiKey: string, apiUnit: s
 
     const totalForecastList: ForecastDetails[] = [];
 
+    // create objects to contain required information for every 3-hourly interval
     for (let index = 0; index < 24; index += 1) {
       const forecastObject = CreateForecastDetailsObj({
         date: dateArray[index],
@@ -240,6 +211,7 @@ const getThreeDaysForecast = async (cityName: string, apiKey: string, apiUnit: s
         weatherID: weatherIDArray[index],
       });
 
+      // add objects for each 3-hourly interval to main forecast array
       totalForecastList.push(forecastObject);
     }
 
@@ -250,22 +222,48 @@ const getThreeDaysForecast = async (cityName: string, apiKey: string, apiUnit: s
   }
 };
 
-const getDateAndTime = (unixTime: number) => {
-  const date = intlFormat(fromUnixTime(unixTime), {
+// Function to get the local date and time of a city
+const getLocalDateTime = (timestamp: number, offset: number) => {
+  // create a DateTime object from the timestamp (converted from seconds to milliseconds)
+  const date = DateTime.fromMillis(timestamp * 1000);
+
+  // get the UTC offset string
+  let offsetString: string;
+  if (offset % 3600 === 0) {
+    // if the offset is a whole hour, use the format "UTC+5" or "UTC-5"
+    offsetString = `UTC${Math.sign(offset) === 1 ? '+' : '-'}${Math.abs(offset / 3600)}`;
+  } else {
+    // if the offset is not a whole hour, use the format "UTC+5:30" or "UTC-5:30"
+    offsetString = `UTC${Math.sign(offset) === 1 ? '+' : '-'}${Math.floor(Math.abs(offset / 3600))}:${Math.round((Math.abs(offset / 3600) - Math.floor(Math.abs(offset / 3600))) * 60)}`;
+  }
+
+  // Adjust the time zone offset
+  let time = date.setZone(offsetString).toString();
+
+  if (time.length > 24) {
+    time = time.slice(0, -6);
+  } else if (time.length === 24) {
+    time = time.slice(0, -1);
+  }
+
+  // change date to required format
+  const localDate = intlFormat(new Date(time), {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
     year: 'numeric',
   });
 
-  const time = intlFormat(fromUnixTime(unixTime), {
+  // change time to required format
+  const localTime = intlFormat(new Date(time), {
     hour: 'numeric',
     minute: 'numeric',
   });
 
-  return { date, time };
+  return { localDate, localTime };
 };
 
+// Function to format temperature based on the chosen measuring system
 const formatTemp = (temp: number, apiUnit: string): string => {
   if (apiUnit === 'metric') {
     return `${temp}°C`;
@@ -274,6 +272,7 @@ const formatTemp = (temp: number, apiUnit: string): string => {
   }
 };
 
+// Function to format wind speed based on the chosen measuring system
 const formatWindSpeed = (windSpeed: number, apiUnit: string): string => {
   if (apiUnit === 'metric') {
     return `${windSpeed}m/s`;
@@ -282,6 +281,7 @@ const formatWindSpeed = (windSpeed: number, apiUnit: string): string => {
   }
 };
 
+// Function to capitalize each word of the weather description in current weather
 const capitalizeWeatherDescription = (weatherDescription: string): string => weatherDescription.toLowerCase().split(' ').map((word) => word.charAt(0).toUpperCase() + word.substring(1)).join(' ');
 
 const displayDetails = (cityDetails: CityDetails, currentWeatherDetails: CurrentWeatherDetails): void => {
@@ -292,30 +292,7 @@ const displayDetails = (cityDetails: CityDetails, currentWeatherDetails: Current
     regionName = `${cityDetails.state}, ${cityDetails.country}`;
   }
 
-  const firstInfo = `
-    <div>
-      <h1 class="text-[1.6rem] leading-[1] font-semibold -ml-0.5 xs:text-[2rem] sm:text-[2.25rem] md:text-[3.2rem] md:-ml-1 lg:text-[3.75rem]">
-        ${cityDetails.cityName}
-      </h1>
-      <p class="font-bebas text-sm tracking-wide text-neutral-600 xs:text-base sm:text-lg md:text-2xl lg:text-3xl dark:text-neutral-500">
-        ${regionName}
-      </p>
-    </div>
-
-    <div class="text-base sm:text-lg md:text-2xl">
-      <p>
-        ${currentWeatherDetails.date}
-      </p>
-      <p>
-        ${currentWeatherDetails.time}
-      </p>
-      <p class="mt-4 font-bold text-4xl sm:text-5xl md:text-6xl lg:text-7xl md:mt-6">
-        ${currentWeatherDetails.currentTemp}
-      </p>
-    </div>
-    `;
-
-  dom.firstInfoContainer.innerHTML = firstInfo;
+  dom.displayCityFirstInformation(cityDetails, currentWeatherDetails, regionName);
 };
 
 const runApp = (): void => {
@@ -335,13 +312,13 @@ const runApp = (): void => {
   if (localStorage.getItem('unit')) {
     apiUnit = JSON.parse(localStorage.getItem('unit'));
     if (apiUnit === 'imperial') {
-      dom.unitToggleBtn.checked = true;
+      dom.selector.unitToggleBtn.checked = true;
     }
   } else {
     apiUnit = 'metric';
   }
 
-  dom.unitToggleBtn.onclick = () => {
+  dom.selector.unitToggleBtn.onclick = () => {
     if (apiUnit === 'metric') {
       apiUnit = 'imperial';
     } else if (apiUnit === 'imperial') {
@@ -356,16 +333,16 @@ const runApp = (): void => {
   getCurrentWeather(cityName, apiKey, apiUnit);
   getThreeDaysForecast(cityName, apiKey, apiUnit);
 
-  dom.searchSubmitBtn.addEventListener('click', (e) => {
+  dom.selector.searchSubmitBtn.addEventListener('click', (e) => {
     e.preventDefault();
 
-    const cityName = dom.citySearch.value;
+    const cityName = dom.selector.citySearch.value;
     localStorage.setItem('cityName', JSON.stringify(cityName));
 
     getCurrentWeather(cityName, apiKey, apiUnit);
     getThreeDaysForecast(cityName, apiKey, apiUnit);
 
-    dom.unitToggleBtn.onclick = () => {
+    dom.selector.unitToggleBtn.onclick = () => {
       if (apiUnit === 'metric') {
         apiUnit = 'imperial';
       } else if (apiUnit === 'imperial') {
@@ -380,3 +357,8 @@ const runApp = (): void => {
 };
 
 runApp();
+
+export {
+  CityDetails,
+  CurrentWeatherDetails,
+};
