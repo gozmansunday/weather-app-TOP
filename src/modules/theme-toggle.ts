@@ -15,6 +15,5 @@ export default function toggleBtn(): void {
 
   dom.selector.themeToggleBtn.onclick = () => {
     dom.toggleTheme(theme);
-    localStorage.setItem('theme', JSON.stringify(theme));
   };
 };
