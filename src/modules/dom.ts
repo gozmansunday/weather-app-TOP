@@ -8,6 +8,7 @@ const selector = {
   themeToggleBtn: document.querySelector('#theme-toggle-btn') as HTMLButtonElement,
   unitToggleBtn: document.querySelector('#toggle') as HTMLInputElement,
   firstInfoContainer: document.querySelector('#first-info-container') as HTMLDivElement,
+  secondInfoContainer: document.querySelector('#second-info-container') as HTMLDivElement,
 };
 
 const preventTransitionOnWindowLoad = (): void => {
@@ -36,6 +37,8 @@ const toggleTheme = (theme: string): void => {
     selector.html.classList.remove('dark');
     theme = 'light';
   }
+  
+  localStorage.setItem('theme', JSON.stringify(theme));
 };
 
 const displayCityFirstInformation = (cityDetails: interfaces.CityDetails, currentWeatherDetails: interfaces.CurrentWeatherDetails, regionName: string): void => {
@@ -65,10 +68,34 @@ const displayCityFirstInformation = (cityDetails: interfaces.CityDetails, curren
   selector.firstInfoContainer.innerHTML = firstInfo;
 };
 
+const displayCitySecondInformation = (currentWeatherDetails: interfaces.CurrentWeatherDetails, iconSvgPath: string): void => {
+  const secondInfo = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+      class="w-20 h-20 xs:w-24 xs:h-24 sm:w-[6.5rem] sm:h-[6.5rem] md:w-36 md:h-36 lg:w-40 lg:h-40 md:mx-auto"
+      viewBox="0 0 16 16">
+      <path
+        d="${iconSvgPath}" />
+    </svg>
+
+    <!-- Current Weather Details -->
+    <div class="my-auto self-center md:my-0">
+      <p class="text-lg font-semibold sm:text-xl md:text-2xl">
+        ${currentWeatherDetails.weatherDescription}
+      </p>
+      <p class="text-base sm:text-lg md:text-xl">
+        Feels like ${currentWeatherDetails.feelsLikeTemp}
+      </p>
+    </div>
+    `;
+  
+  selector.secondInfoContainer.innerHTML = secondInfo;
+};
+
 export {
   selector,
   preventTransitionOnWindowLoad,
   loadStoredTheme,
   toggleTheme,
   displayCityFirstInformation,
+  displayCitySecondInformation,
 };
