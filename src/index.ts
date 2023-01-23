@@ -284,15 +284,36 @@ const formatWindSpeed = (windSpeed: number, apiUnit: string): string => {
 // Function to capitalize each word of the weather description in current weather
 const capitalizeWeatherDescription = (weatherDescription: string): string => weatherDescription.toLowerCase().split(' ').map((word) => word.charAt(0).toUpperCase() + word.substring(1)).join(' ');
 
+// Function to display weather details
 const displayDetails = (cityDetails: CityDetails, currentWeatherDetails: CurrentWeatherDetails): void => {
+  // for first info
   let regionName: string;
+
   if (cityDetails.state === undefined) {
     regionName = `${cityDetails.country}`;
   } else {
     regionName = `${cityDetails.state}, ${cityDetails.country}`;
   }
 
+  // for second info
+  const iconsData = require('./assets/json/icons.json');
+  let iconSvgPath: string;
+
+  iconsData.forEach((iconData: any) => {
+    if (iconData.id === currentWeatherDetails.weatherID) {
+      if (iconData.icon === undefined) {
+        iconSvgPath = iconData.svgPath;
+      } else if (iconData.icon.slice(-1) === 'd') {
+        iconSvgPath = iconData.svgPath;
+      } else if (iconData.icon.slice(-1) === 'n') {
+        iconSvgPath = iconData.svgPath;
+      }
+    }
+  });
+  
   dom.displayCityFirstInformation(cityDetails, currentWeatherDetails, regionName);
+  dom.displayCitySecondInformation(currentWeatherDetails, iconSvgPath);
+  dom.displayCityThirdInformation(currentWeatherDetails);
 };
 
 const runApp = (): void => {
