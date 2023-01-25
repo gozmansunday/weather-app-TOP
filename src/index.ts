@@ -168,60 +168,6 @@ const getCurrentWeather = async (cityName: string, apiKey: string, apiUnit: stri
   }
 };
 
-// Function to call OpenWeather's API to get the 3-hourly three days forecast
-const getThreeDaysForecast = async (cityName: string, apiKey: string, apiUnit: string): Promise<ForecastDetails[]> => {
-  // get city details object from city details function
-  const cityDetails = await getCityDetails(cityName, apiKey);
-
-  // get current weather details object from current weather details function
-  const currentWeatherDetails = await getCurrentWeather(cityName, apiKey, apiUnit);
-  console.log(currentWeatherDetails);
-
-  try {
-    const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${cityDetails.lat}&lon=${cityDetails.lon}&units=${apiUnit}&cnt=24&appid=${apiKey}`, { mode: 'cors' });
-    const forecastInfo = await response.json();
-
-    const dateArray: string[] = [];
-    const timeArray: string[] = [];
-    const tempArray: string[] = [];
-    const weatherArray: string[] = [];
-    const iconArray: string[] = [];
-    const weatherIDArray: number[] = [];
-
-    // add required info into their respective arrays
-    forecastInfo.list.forEach((forecast: any) => {
-      dateArray.push(getLocalDateTime(forecast.dt, currentWeatherDetails.timezone).localDate);
-      timeArray.push(getLocalDateTime(forecast.dt, currentWeatherDetails.timezone).localTime);
-      tempArray.push(formatTemp(Math.round(forecast.main.temp), apiUnit));
-      weatherArray.push(capitalizeWeatherDescription(forecast.weather[0].description));
-      iconArray.push(forecast.weather[0].icon);
-      weatherIDArray.push(forecast.weather[0].id);
-    });
-
-    const totalForecastList: ForecastDetails[] = [];
-
-    // create objects to contain required information for every 3-hourly interval
-    for (let index = 0; index < 24; index += 1) {
-      const forecastObject = CreateForecastDetailsObj({
-        date: dateArray[index],
-        time: timeArray[index],
-        temp: tempArray[index],
-        weather: weatherArray[index],
-        icon: iconArray[index],
-        weatherID: weatherIDArray[index],
-      });
-
-      // add objects for each 3-hourly interval to main forecast array
-      totalForecastList.push(forecastObject);
-    }
-
-    console.log(totalForecastList); //! REMOVE LATER
-    return totalForecastList;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-};
-
 // Function to get the local date and time of a city
 const getLocalDateTime = (timestamp: number, offset: number) => {
   // create a DateTime object from the timestamp (converted from seconds to milliseconds)
@@ -297,23 +243,20 @@ const displayDetails = (cityDetails: CityDetails, currentWeatherDetails: Current
 
   // for second info
   const iconsData = require('./assets/json/icons.json');
-  let iconSvgPath: string;
 
-  iconsData.forEach((iconData: any) => {
-    if (iconData.id === currentWeatherDetails.weatherID) {
-      if (iconData.icon === undefined) {
-        iconSvgPath = iconData.svgPath;
-      } else if (iconData.icon.slice(-1) === 'd') {
-        iconSvgPath = iconData.svgPath;
-      } else if (iconData.icon.slice(-1) === 'n') {
-        iconSvgPath = iconData.svgPath;
-      }
-    }
-  });
+  const iconSvgPath = getSvgPath(currentWeatherDetails.weatherID, currentWeatherDetails.weatherIcon, iconsData);
   
   dom.displayCityFirstInformation(cityDetails, currentWeatherDetails, regionName);
   dom.displayCitySecondInformation(currentWeatherDetails, iconSvgPath);
   dom.displayCityThirdInformation(currentWeatherDetails);
+};
+
+const getSvgPath = (id: number, icon: string | undefined, array: any[]): string => {
+  for (const obj of array) {
+    if (obj.id === id && obj.icon === icon) {
+      return obj.svgPath;
+    }
+  }
 };
 
 const runApp = (): void => {
@@ -347,12 +290,10 @@ const runApp = (): void => {
     }
 
     getCurrentWeather(cityName, apiKey, apiUnit);
-    getThreeDaysForecast(cityName, apiKey, apiUnit);
     localStorage.setItem('unit', JSON.stringify(apiUnit));
   };
 
   getCurrentWeather(cityName, apiKey, apiUnit);
-  getThreeDaysForecast(cityName, apiKey, apiUnit);
 
   dom.selector.searchSubmitBtn.addEventListener('click', (e) => {
     e.preventDefault();
@@ -361,7 +302,6 @@ const runApp = (): void => {
     localStorage.setItem('cityName', JSON.stringify(cityName));
 
     getCurrentWeather(cityName, apiKey, apiUnit);
-    getThreeDaysForecast(cityName, apiKey, apiUnit);
 
     dom.selector.unitToggleBtn.onclick = () => {
       if (apiUnit === 'metric') {
@@ -371,7 +311,6 @@ const runApp = (): void => {
       }
 
       getCurrentWeather(cityName, apiKey, apiUnit);
-      getThreeDaysForecast(cityName, apiKey, apiUnit);
       localStorage.setItem('unit', JSON.stringify(apiUnit));
     };
   });
